@@ -1,0 +1,7 @@
+; $Id$
+name = CiviCRM integration with Xero
+description = Integrates CiviCRM with www.xero.com accounting system
+package = CiviCRM
+core = 6.x
+dependencies[]  = date
+dependencies[] = civicrm

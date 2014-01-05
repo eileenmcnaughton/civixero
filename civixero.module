@@ -1,0 +1,89 @@
+<?php
+// $Id$
+function civixero_menu() {
+
+
+  $items['admin/settings/civixero'] = array(
+    'title' => 'CiviXero Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('civixero_settings_form'),
+    'access arguments' => array('administer civiXero'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'civixero.admin.inc',
+  );
+
+
+    return $items;
+}
+
+function civixero_perm() {
+  return array('civixero_action', 'administer civiXero');
+}
+
+
+/*
+ * Pre process an invoice
+ */
+function civiaccountsync_invoice_prerequisites($invoice,$xero){
+  static $trackingOptions = array();
+  if(empty($trackingOptions)){
+  $tc = $xero->TrackingCategories;
+  //let's just check block exists at all for now - creat an array of options & generate
+  foreach($tc['TrackingCategories']['TrackingCategory'] as $trackingCategory){
+    foreach ($trackingCategory['Options']['Option'] as $key =>$value){
+       $trackingOptions[] = $value['Name'];
+    }
+  }
+  }
+  if(!in_array($invoice['block'],$trackingOptions)){
+    $errors[] = "Tracking Category " . $invoice['block'] ." needs to be created in Xero before the invoice syncronisation can be completed";
+  }
+  if(!in_array($invoice['event_code'],$trackingOptions)){
+    $errors[] = "Tracking Category " . $invoice['event_code'] ." needs to be created in Xero before the invoice syncronisation can be completed";
+  }
+
+  return $errors;
+}
+/*
+ * function to map event types against account codes
+ * TODO replace this or move to custom hook
+ */
+function civiaccountsync_invoice_prepare($invoice){
+ // print_r($invoice);
+ // return $errors;
+}
+
+function civicaccountsync_civixero_validate_response($responseArray){
+
+$message = '';
+    if (is_array($responseArray['Elements']['DataContractBase']['ValidationErrors'])){
+      foreach ($responseArray['Elements']['DataContractBase']['ValidationErrors'] as $key => $value) {
+      // we have a situation where the validation errors are an array of errors
+      // original code expected a string - not sure if / when that might happen
+      // this is all a bit of a hackathon @ the moment
+        if(is_array($value[0])){
+          foreach($value as $errorMessage){
+            if (trim($errorMessage['Message']) == 'Account code must be specified'){
+              return array('You need to set up the account code');
+            }
+            $message .= " " . $errorMessage['Message'];
+          }
+        }else{// single message - string
+         $message = $value['Message'];
+        }
+        switch (trim($message)){
+          case "The Contact Name already exists. Please enter a different Contact Name.":
+            $contact = $responseArray['Elements']['DataContractBase']['Contact'];
+            $message   .= "<br>contact ID is " .  $contact['ContactNumber'];
+            $message  .= "<br>contact name is " . $contact['Name'];
+            $message   .= "<br>contact email is " . $contact['EmailAddress'];
+            break;
+      case "The TaxType field is mandatory Account code must be specified":
+             $message = "Account code needs setting up";
+        }
+       $errors[] = $message;
+      }
+    }
+  return is_array($errors) ? $errors : false;
+
+}

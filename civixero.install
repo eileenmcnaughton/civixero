@@ -1,0 +1,63 @@
+<?php
+// $Id$
+
+/**
+ * Implementation of hook_install
+ */
+
+function civixero_install(){
+  // Use schema API to create database table
+  drupal_install_schema('civixero');
+}
+
+/**
+ * Implementation of hook_uninstall
+ */
+function civixero_uninstall(){
+  // Use schema API to delete database table
+  drupal_uninstall_schema('civixero');
+  //Delete our module's variable from the variables table
+  //TODO - remove any variables
+}
+
+/**
+ * Implementation of hook_schema()
+ */
+
+function civixero_schema(){
+
+  
+
+  $schema['civixero_tracking'] = array(
+  'description' => t('Tracking Categories'),
+  'fields' => array(
+    'cxtid' => array(
+      'description' => t('TODO: please describe this field!'),
+      'type' => 'serial',
+      'not null' => TRUE,
+  ),
+    'name' => array(
+      'description' => t('TODO: please describe this field!'),
+      'type' => 'varchar',
+      'length' => '32',
+      'not null' => TRUE,
+  ),
+    'value' => array(
+      'description' => t('TODO: please describe this field!'),
+      'type' => 'varchar',
+      'length' => '32',
+      'not null' => TRUE,
+  ),
+    'last_sync' => array(
+      'description' => t('TODO: please describe this field!'),
+      'type' => 'int',
+      'not null' => TRUE,
+  ),
+  ),
+  'primary key' => array('cxtid'),
+  );
+
+  return $schema;
+
+
+}
