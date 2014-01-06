@@ -20,30 +20,6 @@ function civixero_perm() {
   return array('civixero_action', 'administer civiXero');
 }
 
-
-/*
- * Pre process an invoice
- */
-function civiaccountsync_invoice_prerequisites($invoice,$xero){
-  static $trackingOptions = array();
-  if(empty($trackingOptions)){
-  $tc = $xero->TrackingCategories;
-  //let's just check block exists at all for now - creat an array of options & generate
-  foreach($tc['TrackingCategories']['TrackingCategory'] as $trackingCategory){
-    foreach ($trackingCategory['Options']['Option'] as $key =>$value){
-       $trackingOptions[] = $value['Name'];
-    }
-  }
-  }
-  if(!in_array($invoice['block'],$trackingOptions)){
-    $errors[] = "Tracking Category " . $invoice['block'] ." needs to be created in Xero before the invoice syncronisation can be completed";
-  }
-  if(!in_array($invoice['event_code'],$trackingOptions)){
-    $errors[] = "Tracking Category " . $invoice['event_code'] ." needs to be created in Xero before the invoice syncronisation can be completed";
-  }
-
-  return $errors;
-}
 /*
  * function to map event types against account codes
  * TODO replace this or move to custom hook
