@@ -47,12 +47,6 @@ function civixero_settings_form ($form_state = NULL){
   '#description' => 'Date of last invoice from Xero retrieval - think before you meddle',
   '#default_value' => variable_get('civixero_lastxeroinvoiceget', ""),
    );
-   $form['civixero_groupxerocustomers']= array(
-    '#type' => 'select',
-    '#description' => 'Add Xero customers to this Civicrm group when created',
-    '#default_value' => variable_get('civixero_groupxerocustomers', ""),
-    '#options' => _civixero_get_groups(),
-   );
 
    $form['civixero_automaticallymatchcontact']= array(
     '#type' => 'select',
@@ -63,24 +57,4 @@ function civixero_settings_form ($form_state = NULL){
 
    #TODO Harden private key location + set defaults
   return system_settings_form($form);
-}
-
-
-
-function _civixero_get_groups() {
-  civicrm_initialize(TRUE);
-  $params= array('return' => 'title');
-  $result = civicrm_api3('group', 'get', $params);
-  foreach ($result['values'] as $group) {
-//need sequential here really....
-  }
-  $groups['0'] = t('') ;
-
-  $sql = "SELECT id, title FROM {civicrm_group} ORDER BY title" ;
-  $qry = db_query($sql) ;
-  while ( $group = db_fetch_array( $qry ) ) {
-    $groups[$group['id']] = $group['title'] ;
-  }
-
-  return $groups ;
 }
